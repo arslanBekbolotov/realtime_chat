@@ -3,21 +3,17 @@ import expressWs from 'express-ws';
 import cors from 'cors';
 import * as mongoose from "mongoose";
 import config from "./config";
+import usersRouter from "./routers/user";
+import chatRouter, {chatWrapper} from "./routers/chat";
 
 const app = express();
 const port = 8000;
 expressWs(app);
+chatWrapper();
 
 app.use(cors());
-
-const chatRouter = express.Router();
-
-chatRouter.ws('/', (ws, req) => {
-    console.log('client connected');
-});
-
-app.use(chatRouter);
-
+app.use('/users',usersRouter);
+app.use('/chat',chatRouter);
 
 const run = async () => {
     await mongoose.connect(config.db);
