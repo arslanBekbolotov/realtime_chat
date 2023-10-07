@@ -6,7 +6,6 @@ export interface IUser{
     token:string;
     password:string;
     displayName:string;
-    googleID?: string,
     role:string;
 }
 
