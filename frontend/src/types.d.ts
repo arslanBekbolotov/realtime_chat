@@ -4,7 +4,17 @@ export interface IMember{
     displayName:string;
 }
 
+export interface IMessage{
+    user:IMember;
+    message:string;
+}
+
+export interface IError{
+    error:string;
+}
+
+
 export interface IncomingMessage{
     type:string;
-    payload:IMember[];
+    payload:IMember[] | IMessage | IError | IMessage[];
 }
