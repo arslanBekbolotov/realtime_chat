@@ -1,5 +1,5 @@
 import express from "express";
-import { ActiveConnections, IncomingMessage } from "../types";
+import { ActiveConnections, IMessage, IncomingMessage } from "../types";
 import crypto from "crypto";
 import { User } from "../models/User";
 import auth from "../middlewares/auth";
@@ -14,11 +14,11 @@ export const chatWrapper = () => {
     activeConnections[id] = ws;
 
     ws.on("message", async (msg) => {
+      const conn = activeConnections[id];
       const decodedMessage = JSON.parse(msg.toString()) as IncomingMessage;
       const user = await auth(
         decodedMessage.payload ? decodedMessage.payload.token : "",
       );
-      const conn = activeConnections[id];
 
       switch (decodedMessage.type) {
         case "REGISTER":
@@ -108,63 +108,58 @@ export const chatWrapper = () => {
 
         case "GET_ALL_MEMBERS":
           const chatMembers = await User.find().select("displayName");
-          Object.keys(activeConnections).forEach((connId) => {
-            const conn = activeConnections[connId];
-
-            if (user.displayName) {
-              conn.send(
-                JSON.stringify({
-                  type: "ALL_MEMBERS",
-                  payload: chatMembers,
-                }),
-              );
-            } else {
-              conn.send(
-                JSON.stringify({
-                  type: "NEW_ERROR",
-                  payload: {
-                    error: user.error,
-                  },
-                }),
-              );
-            }
-          });
+          if (user.displayName && conn) {
+            return conn.send(
+              JSON.stringify({
+                type: "ALL_MEMBERS",
+                payload: chatMembers,
+              }),
+            );
+          } else {
+            conn.send(
+              JSON.stringify({
+                type: "NEW_ERROR",
+                payload: {
+                  error: user.error,
+                },
+              }),
+            );
+          }
 
           break;
 
         case "PREVIOUS_MESSAGES":
           const previousMessages = await Message.find()
             .populate("user")
+            .sort({ createdAt: -1 })
             .limit(30);
 
-          Object.keys(activeConnections).forEach((connId) => {
-            const conn = activeConnections[connId];
-
-            if (user.displayName) {
-              conn.send(
-                JSON.stringify({
-                  type: "PREVIOUS_MESSAGES",
-                  payload: previousMessages,
-                }),
-              );
-            } else {
-              conn.send(
-                JSON.stringify({
-                  type: "NEW_ERROR",
-                  payload: {
-                    error: user.error,
-                  },
-                }),
-              );
-            }
-          });
+          if (user.displayName && conn) {
+            return conn.send(
+              JSON.stringify({
+                type: "PREVIOUS_MESSAGES",
+                payload: previousMessages.reverse(),
+              }),
+            );
+          } else {
+            conn.send(
+              JSON.stringify({
+                type: "NEW_ERROR",
+                payload: {
+                  error: user.error,
+                },
+              }),
+            );
+          }
 
           break;
 
         case "SEND_MESSAGE":
+          let message: IMessage;
+
           if (user.displayName) {
-            await Message.create({
-              user: user.id,
+            message = await Message.create({
+              user: user._id,
               message: decodedMessage.payload.message,
             });
           }
@@ -173,13 +168,10 @@ export const chatWrapper = () => {
             const conn = activeConnections[connId];
 
             if (user.displayName) {
-              conn.send(
+              return conn.send(
                 JSON.stringify({
                   type: "NEW_MESSAGE",
-                  payload: {
-                    user,
-                    message: decodedMessage.payload.message,
-                  },
+                  payload: { _id: message._id, message: message.message, user },
                 }),
               );
             } else {
