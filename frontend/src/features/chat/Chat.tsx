@@ -78,16 +78,6 @@ const Chat = () => {
           );
           break;
 
-        case "UPDATE_PREVIOUS_MESSAGE":
-          JSON.stringify({
-            type: "GET_PREVIOUS_MESSAGES",
-            payload: {
-              token: user?.token,
-            },
-          });
-
-          break;
-
         default:
           console.log("Unknown message type:", decodedMessage.type);
           break;

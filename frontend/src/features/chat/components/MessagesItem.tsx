@@ -1,8 +1,7 @@
 import { IMessage } from "../../../types";
 import React, { MutableRefObject } from "react";
-import { useAppDispatch, useAppSelector } from "../../../app/hooks.ts";
+import { useAppSelector } from "../../../app/hooks.ts";
 import { selectUser } from "../../user/userSlice.ts";
-import { selectOtherUser, setOtherUser } from "../chatSlice.ts";
 
 interface Props {
   message: IMessage;
@@ -11,8 +10,6 @@ interface Props {
 
 const MessagesItem: React.FC<Props> = ({ message, ws }) => {
   const user = useAppSelector(selectUser);
-  const selectedChatUser = useAppSelector(selectOtherUser);
-  const dispatch = useAppDispatch();
 
   const handleDelete = () => {
     if (
@@ -34,7 +31,6 @@ const MessagesItem: React.FC<Props> = ({ message, ws }) => {
 
   return (
     <div
-      onClick={() => dispatch(setOtherUser(null))}
       onDoubleClick={handleDelete}
       className="message-message"
       style={{
@@ -44,17 +40,10 @@ const MessagesItem: React.FC<Props> = ({ message, ws }) => {
       }}
     >
       <div
-        onClick={(e) => {
-          e.stopPropagation();
-          dispatch(setOtherUser(message.user));
-        }}
         style={{
           display: "inline-block",
           backgroundColor:
-            user?._id === message.user._id ||
-            message.user._id === selectedChatUser?._id
-              ? "#295179"
-              : "#172534",
+            user?._id === message.user._id ? "#295179" : "#172534",
           margin: "10px",
           padding: "10px",
           borderRadius: "10px",

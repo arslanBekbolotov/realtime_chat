@@ -9,7 +9,6 @@ const ChatForm: React.FC<Props> = ({ ws }) => {
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const user = useAppSelector(selectUser);
-  // const selectedChatUser = useAppSelector(selectOtherUser);
 
   useEffect(() => {
     inputRef.current?.focus();

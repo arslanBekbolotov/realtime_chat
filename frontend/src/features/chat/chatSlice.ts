@@ -6,14 +6,12 @@ interface chatsState {
   members: IMember[];
   messages: IMessage[];
   ref: HTMLDivElement | null;
-  otherUser: IMember | null;
 }
 
 const initialState: chatsState = {
   members: [],
   messages: [],
   ref: null,
-  otherUser: null,
 };
 
 export const chatsSlice = createSlice({
@@ -29,16 +27,12 @@ export const chatsSlice = createSlice({
     setAllMembers(state, { payload: members }) {
       state.members = members;
     },
-    setOtherUser(state, { payload: otherUser }) {
-      state.otherUser = otherUser;
-    },
   },
 });
 
 export const chatsReducer = chatsSlice.reducer;
 
-export const { setMessage, setPreviousMessages, setAllMembers, setOtherUser } =
+export const { setMessage, setPreviousMessages, setAllMembers } =
   chatsSlice.actions;
 export const selectMembers = (state: RootState) => state.chatStore.members;
-export const selectOtherUser = (state: RootState) => state.chatStore.otherUser;
 export const selectMessages = (state: RootState) => state.chatStore.messages;
