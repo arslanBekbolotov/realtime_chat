@@ -17,7 +17,10 @@ const ChatMembers = () => {
       {members.map((item) => (
         <li
           className="list-item"
-          style={{ padding: "12px 15px", cursor: "pointer" }}
+          style={{
+            padding: "12px 15px",
+            cursor: "pointer",
+          }}
           key={item._id}
         >
           {item.displayName}

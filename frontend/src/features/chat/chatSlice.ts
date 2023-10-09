@@ -1,19 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { IError, IMember, IMessage, ValidationError } from "../../types";
+import { IMember, IMessage } from "../../types";
 import { RootState } from "../../app/store.ts";
 
 interface chatsState {
   members: IMember[];
   messages: IMessage[];
-  chatError: IError | ValidationError | null;
   ref: HTMLDivElement | null;
+  otherUser: IMember | null;
 }
 
 const initialState: chatsState = {
   members: [],
   messages: [],
-  chatError: null,
   ref: null,
+  otherUser: null,
 };
 
 export const chatsSlice = createSlice({
@@ -29,23 +29,16 @@ export const chatsSlice = createSlice({
     setAllMembers(state, { payload: members }) {
       state.members = members;
     },
-    setChatError(state, { payload: error }) {
-      state.chatError = error;
-    },
-    setMessagesRef(state, { payload: ref }) {
-      state.ref = ref;
+    setOtherUser(state, { payload: otherUser }) {
+      state.otherUser = otherUser;
     },
   },
 });
 
 export const chatsReducer = chatsSlice.reducer;
 
-export const {
-  setMessage,
-  setPreviousMessages,
-  setAllMembers,
-  setChatError,
-  setMessagesRef,
-} = chatsSlice.actions;
+export const { setMessage, setPreviousMessages, setAllMembers, setOtherUser } =
+  chatsSlice.actions;
 export const selectMembers = (state: RootState) => state.chatStore.members;
+export const selectOtherUser = (state: RootState) => state.chatStore.otherUser;
 export const selectMessages = (state: RootState) => state.chatStore.messages;

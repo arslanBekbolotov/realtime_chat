@@ -5,21 +5,26 @@ import { RootState } from "../../app/store.ts";
 interface usersState {
   user: IUser | null;
   ws: WebSocket | null;
-  userError: IError | ValidationError | null;
+  registerError: ValidationError | null;
+  loginError: IError | null;
 }
 
 const initialState: usersState = {
   user: null,
   ws: null,
-  userError: null,
+  registerError: null,
+  loginError: null,
 };
 
 export const usersSlice = createSlice({
   name: "users",
   initialState,
   reducers: {
-    setUserError(state, { payload: error }) {
-      state.userError = error;
+    setLoginError(state, { payload: error }) {
+      state.loginError = error;
+    },
+    setRegisterError(state, { payload: registerError }) {
+      state.registerError = registerError.error;
     },
     setUser(state, { payload: user }) {
       state.user = user;
@@ -31,5 +36,6 @@ export const usersSlice = createSlice({
 });
 
 export const usersReducer = usersSlice.reducer;
-export const { setUserError, setUser, unSetUser } = usersSlice.actions;
+export const { setLoginError, setRegisterError, setUser, unSetUser } =
+  usersSlice.actions;
 export const selectUser = (state: RootState) => state.usersStore.user;

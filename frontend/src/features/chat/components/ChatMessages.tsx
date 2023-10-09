@@ -1,9 +1,13 @@
 import { useAppSelector } from "../../../app/hooks.ts";
 import { selectMessages } from "../chatSlice.ts";
-import { useEffect, useRef } from "react";
+import React, { MutableRefObject, useEffect, useRef } from "react";
 import MessagesItem from "./MessagesItem.tsx";
 
-const ChatMessages = () => {
+interface Props {
+  ws: MutableRefObject<WebSocket | null>;
+}
+
+const ChatMessages: React.FC<Props> = ({ ws }) => {
   const messages = useAppSelector(selectMessages);
   const messageRef = useRef<HTMLDivElement>(null);
 
@@ -24,21 +28,8 @@ const ChatMessages = () => {
       }}
     >
       {messages.map((item) => (
-        <MessagesItem key={Math.random()} message={item} />
+        <MessagesItem key={Math.random()} message={item} ws={ws} />
       ))}
-      {/*<span*/}
-      {/*  style={{*/}
-      {/*    position: "absolute",*/}
-      {/*    bottom: "60px",*/}
-      {/*    right: "10px",*/}
-      {/*    padding: "10px 18px 10px",*/}
-      {/*    fontSize: "25px",*/}
-      {/*    borderRadius: "50%",*/}
-      {/*    backgroundColor: "#17212b",*/}
-      {/*  }}*/}
-      {/*>*/}
-      {/*  ᨆ*/}
-      {/*</span>*/}
       <div ref={messageRef}></div>
     </div>
   );

@@ -18,12 +18,17 @@
 
 .auth_input {
     padding:18px;
+    margin-bottom: 15px;
     border-radius: 10px;
-    margin-bottom:1.5rem;
     background-color: transparent;
     border: 1px solid #2f2f2f;
     color: #fff;
     font-size: 16px;
+}
+
+.input_helper{
+    margin-bottom:10px;
+    color: red;
 }
 
 ::placeholder {

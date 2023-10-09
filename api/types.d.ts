@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { Schema, Types } from "mongoose";
 import { WebSocket } from "ws";
 
 export interface IUser {
@@ -7,6 +7,19 @@ export interface IUser {
   password: string;
   displayName: string;
   role: string;
+}
+
+export interface IUserMutation {
+  error?: string;
+  _id?: Types.ObjectId;
+  displayName?: string;
+  role?: string;
+  username?: string;
+}
+
+export interface IActiveUser {
+  username: string;
+  displayName: string;
 }
 
 export interface IMessage {

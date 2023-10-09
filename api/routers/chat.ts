@@ -1,9 +1,14 @@
 import express from "express";
-import { ActiveConnections, IMessage, IncomingMessage } from "../types";
+import { ActiveConnections, IncomingMessage } from "../types";
 import crypto from "crypto";
-import { User } from "../models/User";
-import auth from "../middlewares/auth";
-import { Message } from "../models/Message";
+import auth from "../controllers/auth";
+import register from "../controllers/register";
+import login from "../controllers/login";
+import logout from "../controllers/logout";
+import getAllMembers from "../controllers/getAllMembers";
+import getPreviousMessages from "../controllers/getPreviousMessages";
+import sendMessage from "../controllers/sendMessage";
+import deleteMessage from "../controllers/deleteMessage";
 
 const chatRouter = express.Router();
 const activeConnections: ActiveConnections = {};
@@ -22,170 +27,31 @@ export const chatWrapper = () => {
 
       switch (decodedMessage.type) {
         case "REGISTER":
-          try {
-            const newUser = new User({
-              username: decodedMessage.payload.username,
-              password: decodedMessage.payload.password,
-              displayName: decodedMessage.payload.displayName,
-            });
-
-            newUser.generateToken();
-
-            await newUser.save();
-
-            return conn.send(
-              JSON.stringify({
-                type: "NEW_USER",
-                payload: newUser,
-              }),
-            );
-          } catch (error) {
-            conn.send(
-              JSON.stringify({
-                type: "NEW_ERROR",
-                payload: {
-                  error,
-                },
-              }),
-            );
-          }
-
+          await register(conn, decodedMessage);
           break;
 
         case "LOGIN":
-          try {
-            const registeredUser = await User.findOne({
-              username: decodedMessage.payload.username,
-            });
+          await login(conn, decodedMessage, user);
+          break;
 
-            if (!user) {
-              return conn.send(
-                JSON.stringify({
-                  type: "NEW_ERROR",
-                  payload: {
-                    error: "Wrong password or username!",
-                  },
-                }),
-              );
-            }
-
-            const isMatch = await registeredUser?.checkPassword(
-              decodedMessage.payload.password,
-            );
-
-            if (!isMatch) {
-              return conn.send(
-                JSON.stringify({
-                  type: "NEW_ERROR",
-                  payload: {
-                    error: "Wrong password or username!",
-                  },
-                }),
-              );
-            }
-
-            registeredUser?.generateToken();
-            await registeredUser?.save();
-
-            return conn.send(
-              JSON.stringify({
-                type: "NEW_USER",
-                payload: registeredUser,
-              }),
-            );
-          } catch (error) {
-            conn.send(
-              JSON.stringify({
-                type: "NEW_ERROR",
-                payload: {
-                  error,
-                },
-              }),
-            );
-          }
-
+        case "LOGOUT":
+          await logout(conn, user);
           break;
 
         case "GET_ALL_MEMBERS":
-          const chatMembers = await User.find().select("displayName");
-          if (user.displayName && conn) {
-            return conn.send(
-              JSON.stringify({
-                type: "ALL_MEMBERS",
-                payload: chatMembers,
-              }),
-            );
-          } else {
-            conn.send(
-              JSON.stringify({
-                type: "NEW_ERROR",
-                payload: {
-                  error: user.error,
-                },
-              }),
-            );
-          }
-
+          await getAllMembers(conn, user);
           break;
 
-        case "PREVIOUS_MESSAGES":
-          const previousMessages = await Message.find()
-            .populate("user")
-            .sort({ createdAt: -1 })
-            .limit(30);
-
-          if (user.displayName && conn) {
-            return conn.send(
-              JSON.stringify({
-                type: "PREVIOUS_MESSAGES",
-                payload: previousMessages.reverse(),
-              }),
-            );
-          } else {
-            conn.send(
-              JSON.stringify({
-                type: "NEW_ERROR",
-                payload: {
-                  error: user.error,
-                },
-              }),
-            );
-          }
-
+        case "GET_PREVIOUS_MESSAGES":
+          await getPreviousMessages(conn, user);
           break;
 
         case "SEND_MESSAGE":
-          let message: IMessage;
+          await sendMessage(user, decodedMessage, activeConnections);
+          break;
 
-          if (user.displayName) {
-            message = await Message.create({
-              user: user._id,
-              message: decodedMessage.payload.message,
-            });
-          }
-
-          Object.keys(activeConnections).forEach((connId) => {
-            const conn = activeConnections[connId];
-
-            if (user.displayName) {
-              return conn.send(
-                JSON.stringify({
-                  type: "NEW_MESSAGE",
-                  payload: { _id: message._id, message: message.message, user },
-                }),
-              );
-            } else {
-              conn.send(
-                JSON.stringify({
-                  type: "NEW_ERROR",
-                  payload: {
-                    error: user.error,
-                  },
-                }),
-              );
-            }
-          });
-
+        case "DELETE_MESSAGE":
+          await deleteMessage(conn, user, decodedMessage);
           break;
       }
     });

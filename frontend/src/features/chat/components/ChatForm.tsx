@@ -9,6 +9,7 @@ const ChatForm: React.FC<Props> = ({ ws }) => {
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const user = useAppSelector(selectUser);
+  // const selectedChatUser = useAppSelector(selectOtherUser);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -18,6 +19,7 @@ const ChatForm: React.FC<Props> = ({ ws }) => {
     e.preventDefault();
     if (ws && user) {
       setMessage("");
+
       ws.current?.send(
         JSON.stringify({
           type: "SEND_MESSAGE",

@@ -13,8 +13,9 @@ export interface IUser {
 }
 
 export interface IMessage {
-  user: IMember;
+  _id: string;
   message: string;
+  user: IMember;
 }
 
 export interface IError {

@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 
 const Layout: React.FC<PropsWithChildren> = ({ children }) => {
   const { pathname } = useLocation();
+
   return (
     <div>
       <header>{pathname === "/" && <Header />}</header>
